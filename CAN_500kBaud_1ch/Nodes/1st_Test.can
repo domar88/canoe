@@ -1,0 +1,171 @@
+﻿/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  message Engine_Sts RPM;
+  int tempRPM;
+  int Answer;
+  char teststepglobal[10];
+  long tempsignalchange;
+  int loopcounter, teststepcounter, secondLoopCounter;
+  float tmpSgnl;
+  
+  int iFinalVerdict;
+
+}
+
+/* Main function contains all tesc cases. */
+void MainTest () 
+{
+  long lVerdict_TC_RpmIncreasing;
+  long lVerdict_TC_RpmDecreasing;
+  long lVerdict_TC_BrakePedalTempIncr;
+  iFinalVerdict = 3;
+  
+  
+  
+  testReportAddEngineerInfo("Andrzej", "home");
+  
+  testModuleTitle("Test of RPM module.");
+  testModuleDescription("This module will be responsible for test our project.");
+  
+  testGroupBegin("RPM tests", "In this Group RPM will be tested");
+  
+  TC_RpmIncreasing();
+  lVerdict_TC_RpmIncreasing = TestGetVerdictLastTestCase();
+  testWaitForTimeout(1000);
+  TC_RpmDecreasing();
+  lVerdict_TC_RpmDecreasing = TestGetVerdictLastTestCase();
+  TC_BrakePedalTempIncr();
+  lVerdict_TC_RpmDecreasing = TestGetVerdictLastTestCase();
+  
+  testGroupEnd();
+  
+  if ( (lVerdict_TC_RpmIncreasing == 0) )
+  {
+    TestSetVerdictModule(0);
+    iFinalVerdict = 0;
+  }
+  else
+  {
+    TestSetVerdictModule(1);
+    iFinalVerdict = 1;
+  }
+  
+//  if (iFinalVerdict == 0 || iFinalVerdict == 1) stop();
+}
+
+
+
+testcase TC_RpmIncreasing(void)
+{
+  long result;
+  int a;
+  loopcounter = 0;
+  teststepcounter = 0;
+//  testCaseTitle("TC_1", "TC_ChangeOfRpmCheck");
+  testCaseDescription("This TC check posibility of RPM signal to has value highier or equal than 5.");
+  testCaseDescription("To PASS this test RPM signal should achieve value 5 or higher. If during 10 times RPM signal not achieve minimul value equal 5, than test will FAIL.");
+  testCaseComment("Start TC.");
+//  result = testWaitForMessage(Engine_Sts, 5000);
+//  testStep(teststepcounter, "this is step %d", $Engine_Sts::RPM);
+  
+//  a = testWaitForSignalChange(Engine_Sts::RPM, 2000);
+//  testCaseReportMeasuredValue("a is ", a);
+
+  while(1)
+  {
+  
+//      tempsignalchange = testWaitForSignalChange(Engine_Sts::RPM, 200);
+//      tempsignalchange = testWaitForSignalInRange(Engine_Sts::RPM, 5, 20, 6000);
+//      tempsignalchange = testWaitForSignalMatch(Engine_Sts::RPM, 5, 6000);
+//        getSignal(Engine_Sts::RPM);
+//      tmpSgnl = checkSignalInRange(Engine_Sts::RPM, 5, 20);
+//    getSignalTime(Engine_Sts::RPM);
+//    testStep(teststepcounter, "this is step %d", $Engine_Sts::RPM);
+    
+//      testCaseReportMeasuredValue("RPM is ", tempsignalchange);
+      if($Engine_Sts::RPM >= 5)
+      {
+        testCaseReportMeasuredValue("RPM ", $Engine_Sts::RPM);
+        testStepPass("TC_RpmIncreasing Pass.");
+        break;
+      }
+      else
+      {
+//        testCaseReportMeasuredValue("RPM is ", $Engine_Sts::RPM);
+        
+//        testWaitForSignalChange(Engine_Sts::RPM, 5000);
+        if(loopcounter > 10)
+        {
+          testCaseReportMeasuredValue("RPM ", $Engine_Sts::RPM);
+          testStepFail();
+          break; 
+        }
+        loopcounter++;
+        teststepcounter++;
+      }
+//      testWaitForTimeout(1000);
+      testWaitForSignalUpdate(Engine_Sts::RPM, 0);
+      
+  } // end while
+    
+ 
+  
+} // end TC_RpmIncreasing
+
+
+testcase TC_RpmDecreasing()
+{
+  long firstRpmValue;
+  testCaseDescription("This TC check posibility of decrasing of RPM signal.");
+  testCaseComment("Decreasing test started.");
+  
+  if($Engine_Sts::RPM > 0)
+  {
+    firstRpmValue = $Engine_Sts::RPM;
+    
+    while (1)
+    {
+       if($Engine_Sts::RPM < firstRpmValue)
+       {
+         testCaseReportMeasuredValue("Measured no", secondLoopCounter+1);
+         testCaseReportMeasuredValue("RPM vale", (int)$Engine_Sts::RPM);
+         testStepPass("RPM decreasing PASS");
+         break;
+       }
+       else
+       {
+        if(secondLoopCounter > 10)
+        {
+          testCaseReportMeasuredValue("Measured no", secondLoopCounter+1);
+          testCaseReportMeasuredValue("RPM vale", (int)$Engine_Sts::RPM);
+//          testCaseReportMeasuredValue("RPM", $Engine_Sts::RPM);
+          testStepFail();
+          break; 
+        }
+        testCaseReportMeasuredValue("Measured no", secondLoopCounter+1);
+        testCaseReportMeasuredValue("RPM vale", (int)$Engine_Sts::RPM);
+        firstRpmValue = $Engine_Sts::RPM;
+        secondLoopCounter++;
+        teststepcounter++;
+       }
+       testWaitForSignalUpdate(Engine_Sts::RPM, 0);
+    }
+  }
+  
+}
+
+
+testcase TC_BrakePedalTempIncr()
+{
+  testCaseReportMeasuredValue("PedalPressed", (int)$Brake_Sts::PedalPressed);
+  setSignal("CAN1::Brake_Sts::PedalPressed", 1);
+  testWaitForSignalUpdate(Brake_Sts::PedalPressed, 5000);
+  testCaseReportMeasuredValue("PedalPressed", (int)$Brake_Sts::PedalPressed);
+  setSignal("CAN1::Brake_Sts::PedalPressed", 0);
+}

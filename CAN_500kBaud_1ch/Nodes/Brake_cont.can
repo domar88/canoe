@@ -1,0 +1,14 @@
+﻿/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  int PressureValue = 0;
+  int TemperatureValue = 0;
+  
+  
+}
+

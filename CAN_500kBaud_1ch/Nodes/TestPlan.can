@@ -1,0 +1,21 @@
+﻿/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  
+}
+
+void PackageOfTests(void) {
+  
+ TC_BCM_Sts_Counter_Increasing(); 
+}
+
+void TC_BCM_Sts_Counter_Increasing(void) {
+  int result = 1;
+  TestWaitForSignalAvailable();
+  TestStep("1", "Output voltage ok");
+  }

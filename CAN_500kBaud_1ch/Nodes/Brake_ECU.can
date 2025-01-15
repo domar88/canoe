@@ -1,0 +1,88 @@
+﻿/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  int brake_sts;
+  int brake_temp = 0;
+  int timerTrigger;
+  
+ timer timeOfPressBrkPdl;
+  
+  message Brake_Sts brakeSts;
+  
+}
+
+on start
+{
+   brake_sts = 0;
+  timerTrigger = 0;
+  brakeSts.PedalPressed = brake_sts;
+  
+  output(brakeSts);
+ }
+
+on key 'b'
+{
+    if (brake_sts == 0)
+    {
+      brake_sts = 1;
+      brakeSts.PedalPressed = brake_sts;
+    }
+    else if (brake_sts == 1)
+    {
+      brake_sts = 0;
+      brakeSts.PedalPressed = brake_sts;
+    }
+    output(brakeSts);
+}
+
+
+
+on signal PedalPressed
+{
+   
+    if (brake_sts == 1)
+    {
+    write("Brake pedal pressed");
+      if (timerTrigger == 0)
+      {
+        setTimer(timeOfPressBrkPdl, 5);
+        timerTrigger = 1;
+      }
+      
+    }
+    else if (brake_sts == 0)
+    {
+    write("Brake pedal released");
+    }
+}
+
+on timer timeOfPressBrkPdl
+{
+//  cancelTimer(timeOfPressBrkPdl);
+  if (brake_sts == 1)
+    {
+      if (brake_temp < 0xFF)
+      {
+        brake_temp = (brake_temp+1) & 0xFF; 
+      }           
+    }
+    else if (brake_sts == 0)
+    {
+      if (brake_temp > 0x00)
+      {
+        brake_temp = (brake_temp-1) & 0xFF; 
+      }
+      
+    }
+      
+  
+  brakeSts.BrakeTemp = brake_temp;
+  output(brakeSts);
+  
+  setTimer(timeOfPressBrkPdl, 5);
+}

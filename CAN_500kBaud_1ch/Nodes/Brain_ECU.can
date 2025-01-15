@@ -1,0 +1,90 @@
+﻿/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  int MessageCounter = 0;
+  int64 RPM;
+  int64 lastRPM = 0;
+  int RX_BrkTemp;
+  
+  char buffer[50];
+  
+  timer CyclicFrameTransmission;
+  
+  message Brain_Sts BCM_sts_variable;
+  message Engine_Sts RxRPM;
+}
+
+on start {
+  
+  setTimer(CyclicFrameTransmission, 1);
+//  BCM_sts_variable.HeadLightSts = 0x11;
+//  BCM_sts_variable.TurnSignal = 0x7;
+}
+
+on timer CyclicFrameTransmission{
+ 
+  MessageCounter = (MessageCounter+1) & 0xFF;
+  BCM_sts_variable.Counter = MessageCounter;
+  output(BCM_sts_variable);
+  
+  setTimer(CyclicFrameTransmission, 1);
+}
+
+
+
+on message Engine_Sts
+{
+ write("BCM Rx data from Engine");
+  if (this.dir == RX)
+  {
+    
+    if (lastRPM != this.RPM)
+    {
+      write("RPM = %ld", this.RPM);
+      lastRPM = this.RPM;
+    }
+    else
+    {
+      write("RPM didn't change");
+    }
+
+  }
+
+}
+
+on message Brake_Sts
+{
+  if (this.BrakeTemp == RX)
+  {
+    RX_BrkTemp = this.BrakeTemp;
+    if (40 >= RX_BrkTemp > 20)
+    {
+      write("Brake temp is high");  
+    }
+    else if (RX_BrkTemp > 40)
+    {
+      write("!!! DANGER! brake temp is very high !!!");
+      
+    }
+  }
+  
+  
+  
+  
+}
+
+
+
+
+/*
+on signal_change RPM
+{
+  RPM = getSignalValueForDescription(Engine_Sts::RPM, this, RPM);
+  write("RPM value = %d", RPM);
+}
+*/

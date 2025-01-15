@@ -1,0 +1,87 @@
+﻿/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  int RpmValue = 0;
+  int TemperatureValue = 19;
+  
+  timer CyclicIncreaseOfTemperature;
+  timer RpmTimer;
+  
+  message Engine_Sts Engine_Sts_variable;
+}
+
+on key 'a'{
+
+  if (RpmValue != 0xFF)
+  {
+    RpmValue = (RpmValue+1) & 0xFF;
+    Engine_Sts_variable.RPM = RpmValue;
+    output(Engine_Sts_variable);
+  }
+  
+}
+
+on key 'z'{
+
+  if (RpmValue != 0x00)
+  {
+    RpmValue = (RpmValue-1) & 0xFF;
+    Engine_Sts_variable.RPM = RpmValue;
+    output(Engine_Sts_variable);
+  }
+  
+}
+
+on start {
+
+  setTimer(CyclicIncreaseOfTemperature, 20);
+}
+
+on signal RPM {
+  
+  if (RpmValue >= 10 && RpmValue < 20)
+  {
+    setTimer(RpmTimer, 10);
+  }
+  else if (RpmValue >= 20 && RpmValue < 30)
+  {
+    setTimer(RpmTimer, 7);
+  }
+  else if (RpmValue >= 30)
+  {
+    setTimer(RpmTimer, 5);
+  }
+}
+
+
+on timer CyclicIncreaseOfTemperature {
+ 
+  TemperatureValue = (TemperatureValue+1) & 0xFF;
+  Engine_Sts_variable.EngTemp = TemperatureValue;
+  output(Engine_Sts_variable);
+  
+  if (TemperatureValue <= 115)
+  {
+    setTimer(CyclicIncreaseOfTemperature, 20);
+  }
+}
+
+on timer RpmTimer {
+  
+   TemperatureValue = (TemperatureValue+1) & 0xFF;
+  Engine_Sts_variable.EngTemp = TemperatureValue;
+  output(Engine_Sts_variable);
+  
+  if (TemperatureValue <= 120)
+  {
+    if (RpmValue >= 10 && RpmValue < 20)
+    {
+      setTimer(RpmTimer, 10);
+    }
+  }
+}
