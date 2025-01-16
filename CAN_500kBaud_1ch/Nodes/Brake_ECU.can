@@ -45,7 +45,7 @@ on key 'b'
 on signal PedalPressed
 {
    
-    if (brake_sts == 1)
+    if ($Brake_Sts::PedalPressed == 1)
     {
     write("Brake pedal pressed");
       if (timerTrigger == 0)
@@ -55,7 +55,7 @@ on signal PedalPressed
       }
       
     }
-    else if (brake_sts == 0)
+    else if ($Brake_Sts::PedalPressed == 0)
     {
     write("Brake pedal released");
     }
@@ -64,14 +64,14 @@ on signal PedalPressed
 on timer timeOfPressBrkPdl
 {
 //  cancelTimer(timeOfPressBrkPdl);
-  if (brake_sts == 1)
+  if ($Brake_Sts::PedalPressed == 1)
     {
       if (brake_temp < 0xFF)
       {
         brake_temp = (brake_temp+1) & 0xFF; 
       }           
     }
-    else if (brake_sts == 0)
+    else if ($Brake_Sts::PedalPressed == 0)
     {
       if (brake_temp > 0x00)
       {

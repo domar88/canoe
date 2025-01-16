@@ -167,5 +167,15 @@ testcase TC_BrakePedalTempIncr()
   setSignal("CAN1::Brake_Sts::PedalPressed", 1);
   testWaitForSignalUpdate(Brake_Sts::PedalPressed, 5000);
   testCaseReportMeasuredValue("PedalPressed", (int)$Brake_Sts::PedalPressed);
+  
+  if(1 != testWaitForSignalChange(Brake_Sts::BrakeTemp, 10000))
+  {
+    testCaseReportMeasuredValue("Brake Temperature Changed", (int)$Brake_Sts::BrakeTemp);
+    testStepPass();
+  }  
+  else
+  {
+    testStepFail();
+  }
   setSignal("CAN1::Brake_Sts::PedalPressed", 0);
 }
